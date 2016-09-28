@@ -5,5 +5,5 @@ with open("test_a_golden_crown.txt", "r") as f:
     
 data = re.sub("\n+", "\n", data)
 
-with open("a.txt", "w") as f:
+with open("base.txt", "w") as f:
     f.write(data)
