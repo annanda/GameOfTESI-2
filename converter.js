@@ -63,12 +63,13 @@ class Parser{
 	}
 
 	getPlot(){
-		return /PlotEdit\n(.*?)\n/.exec(this.file)[1];
+		return this.removeBorderSpaces(/PlotEdit\n(.*?)\n/.exec(this.file)[1]);
 	}
 
 	getSummary(){
 		let startPos = /SummaryEdit\n/.exec(this.file).index + "SummaryEdit\n".length;
-		let endPos = /RecapEdit\n/.exec(this.file).index - 1;
+		let endPos = /RecapEdit\n/.exec(this.file);
+		endPos = (endPos)? endPos.index - 1: /AppearancesEdit\n/.exec(this.file).index - 1;
 		let summary = this.file.substring(startPos, endPos);
 		let edits = [];//summary.match(/(.*?)Edit/g);
 		let scenes = [];
@@ -94,26 +95,44 @@ class Parser{
 	}
 
 	getFirsts(){
-		let startPos = /FirstEdit\n/.exec(this.file).index + "FirstEdit\n".length;
-		let endPos = /DeathsEdit\n/.exec(this.file).index;
+		let startPos = /(FirstEdit|First AppearancesEdit)\n/.exec(this.file).index + "FirstEdit\n".length;
+		let endPos = /(DeathsEdit|CastEdit|ProductionEdit)\n/.exec(this.file).index;
 		let sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
-		return sub.split("\n");
+		let firsts = sub.split("\n");
+		let final = [];
+		for (let i = 0; i < firsts.length; i++) {
+			let temp = this.removeBorderSpaces(firsts[i]);
+			if(temp == ""){
+				continue;
+			}
+			final.push(temp);
+		}
+		return final;
 	}
 	
 	getDeaths(){
-		let startPos = /DeathsEdit\n/.exec(this.file).index + "DeathsEdit\n".length;
-		let endPos = /CastEdit\n/.exec(this.file).index;
-		let sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
-		let firsts = sub.split("\n");
-		for (let i = 0; i < firsts.length; i++) {
-			firsts[i] = this.removeBorderSpaces(firsts[i]);
+		let possibleMatch = /DeathsEdit\n/.exec(this.file);
+		if(possibleMatch == undefined){
+			return [];
 		}
-		return firsts;
+		let startPos = possibleMatch.index + "DeathsEdit\n".length;
+		let endPos = /(ProductionEdit|CastEdit)\n/.exec(this.file).index;
+		let sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
+		let deaths = sub.split("\n");
+		let final = [];
+		for (let i = 0; i < deaths.length; i++) {
+			let temp = this.removeBorderSpaces(deaths[i]);
+			if(temp == ""){
+				continue;
+			}
+			final.push(temp);
+		}
+		return final;
 	}
 
 	getCast(){
 		let startPos = /Starring\n/.exec(this.file).index + "Starring\n".length;
-		let endPos = /Also/.exec(this.file).index;
+		let endPos = /(Also [sS]tarring|Guest)/.exec(this.file).index;
 		let sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
 		let cast = sub.split("\n");
 		let formattedCast = [];
@@ -121,22 +140,27 @@ class Parser{
 			cast[i] = this.removeBorderSpaces(cast[i]);
 			let tempCast = cast[i].split(" as ");
 			tempCast[0] = tempCast[0].replace("and", "");
+			tempCast[1] = tempCast[1].replace("(credit only)", "");
 			formattedCast.push({actor: this.removeBorderSpaces(tempCast[0]), character: this.removeBorderSpaces(tempCast[1])});
 		}
 
-		startPos = /Also starring\n/.exec(this.file).index + "Also starring\n".length;
-		endPos = /Guest/.exec(this.file).index;
-		sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
-		cast = sub.split("\n");
-		for (let i = 0; i < cast.length; i++) {
-			cast[i] = this.removeBorderSpaces(cast[i]);
-			let tempCast = cast[i].split(" as ");
-			tempCast[0] = tempCast[0].replace("and", "");
-			formattedCast.push({actor: this.removeBorderSpaces(tempCast[0]), character: this.removeBorderSpaces(tempCast[1])});
+		let possibleMatch = /Also [sS]tarring\n/.exec(this.file);
+		if(possibleMatch != undefined){
+			startPos = possibleMatch.index + "Also starring\n".length;
+			endPos = /Guest/.exec(this.file).index;
+			sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
+			cast = sub.split("\n");
+			for (let i = 0; i < cast.length; i++) {
+				cast[i] = this.removeBorderSpaces(cast[i]);
+				let tempCast = cast[i].split(" as ");
+				tempCast[0] = tempCast[0].replace("and", "");
+				formattedCast.push({actor: this.removeBorderSpaces(tempCast[0]), character: this.removeBorderSpaces(tempCast[1])});
+			}	
 		}
 
 		startPos = /Guest starring\n/.exec(this.file).index + "Guest starring\n".length;
-		endPos = /Uncredited/.exec(this.file).index;
+		let possibleEndPos = /(Stunt|Uncredited)/.exec(this.file);
+		endPos = (possibleEndPos == undefined)? /Cast notesEdit/.exec(this.file).index : possibleEndPos.index;
 		sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
 		cast = sub.split("\n");
 		for (let i = 0; i < cast.length; i++) {
@@ -147,14 +171,17 @@ class Parser{
 			formattedCast.push({actor: this.removeBorderSpaces(tempCast[0]), character: this.removeBorderSpaces(tempCast[1])});
 		}
 
+		if(possibleEndPos == undefined){
+			return formattedCast;
+		}
 		startPos = /Uncredited\n/.exec(this.file).index + "Uncredited\n".length;
-		endPos = /Cast NotesEdit/.exec(this.file).index;
+		endPos = /Cast [nN]otesEdit/.exec(this.file).index;
 		sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
 		cast = sub.split("\n");
 		for (let i = 0; i < cast.length; i++) {
 			cast[i] = this.removeBorderSpaces(cast[i]);
 			let tempCast = cast[i].split(" as ");
-			tempCast[0] = tempCast[0].replace("and", "");
+			tempCast[0] = tempCast[0].replace("and", "");			
 			tempCast[1] = tempCast[1].replace("(credit only)", "");
 			formattedCast.push({actor: this.removeBorderSpaces(tempCast[0]), character: this.removeBorderSpaces(tempCast[1])});
 		}
@@ -175,4 +202,4 @@ class Parser{
 	}
 }
 
-let obj = new Parser("../episodes/season_1/a_golden_crown.txt");
+let obj = new Parser("../episodes/season_2/valar_morghulis.txt");
