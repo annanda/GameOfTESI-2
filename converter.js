@@ -139,6 +139,7 @@ class Parser{
 		for (let i = 0; i < cast.length; i++) {
 			cast[i] = this.removeBorderSpaces(cast[i]);
 			let tempCast = cast[i].split(" as ");
+			// console.log(tempCast);
 			tempCast[0] = tempCast[0].replace("and", "");
 			tempCast[1] = tempCast[1].replace("(credit only)", "");
 			formattedCast.push({actor: this.removeBorderSpaces(tempCast[0]), character: this.removeBorderSpaces(tempCast[1])});
@@ -158,7 +159,7 @@ class Parser{
 			}	
 		}
 
-		startPos = /Guest starring\n/.exec(this.file).index + "Guest starring\n".length;
+		startPos = /Guest [sS]tarring\n/.exec(this.file).index + "Guest starring\n".length;
 		let possibleEndPos = /(Stunt|Uncredited)/.exec(this.file);
 		endPos = (possibleEndPos == undefined)? /Cast notesEdit/.exec(this.file).index : possibleEndPos.index;
 		sub = this.removeBorderSpaces(this.file.substring(startPos, endPos));
@@ -166,6 +167,7 @@ class Parser{
 		for (let i = 0; i < cast.length; i++) {
 			cast[i] = this.removeBorderSpaces(cast[i]);
 			let tempCast = cast[i].split(" as ");
+			// console.log(tempCast);
 			tempCast[0] = tempCast[0].replace("and", "");
 			tempCast[1] = tempCast[1].replace("(credit only)", "");
 			formattedCast.push({actor: this.removeBorderSpaces(tempCast[0]), character: this.removeBorderSpaces(tempCast[1])});
@@ -202,4 +204,4 @@ class Parser{
 	}
 }
 
-let obj = new Parser("../episodes/season_2/valar_morghulis.txt");
+let obj = new Parser("../episodes/season_4/two_swords.txt");
