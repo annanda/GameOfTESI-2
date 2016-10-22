@@ -204,4 +204,4 @@ class Parser{
 	}
 }
 
-let obj = new Parser("../episodes/season_4/two_swords.txt");
+let obj = new Parser("../episodes/season_6/the_red_woman.txt");
