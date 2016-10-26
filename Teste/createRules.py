@@ -72,7 +72,6 @@ def h_dist(rule1, rule2):
 
 def optimizeRules(rules):
     sep_rules = separate_by_type(rules)
-    print(sep_rules)
     op_rules = {}
     for t in sep_rules:
         for rule in sep_rules[t]:
@@ -83,19 +82,16 @@ def optimizeRules(rules):
                 size = len(op_rules[t])
                 for i in range(size):
                     current_rule = op_rules[t][i]
-                    print(h_dist(current_rule, rule))
                     if(h_dist(current_rule, rule) > sensitivity and added == False):
-                        print("ifDIST")
                         op_rules[t].append(convertToArray(rule))
                         added = True
                     elif(added == False):
-                        print("elseDIST")
                         op_rules[t][i] = (merge(current_rule, rule))
     return op_rules
 
 #Hyperparameters    
 sizeWindow = 3
 variety = 3
-sensitivity = 2
+sensitivity = 3
 
 print(createRules(data))
