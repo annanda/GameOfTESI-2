@@ -12,17 +12,17 @@ text = json.loads(text)
 text = text["summary"][0]["content"]
 
 
-def findMe(string, text):
-    string = string.split(" ")
+# def findMe(string, text):
+#     string = string.split(" ")
     
-    sizeText = len(text)
-    sizeString = len(string)
-    for i in range(sizeText - sizeString):
-        for j in range(sizeString):
-            if (j == sizeString - 1) and (string[j] != text[i+j]):
-            
-            if string[j] != text[i+j]:
-                break
+#     sizeText = len(text)
+#     sizeString = len(string)
+#     for i in range(sizeText - sizeString):
+#         for j in range(sizeString):
+#             if (j == sizeString - 1) and (string[j] != text[i+j]):
+                
+#             if string[j] != text[i+j]:
+#                 break
             
 #Training:
 sizeWindow = 2
@@ -32,7 +32,7 @@ rules = []
 text = nltk.word_tokenize(text)
 text = nltk.pos_tag(text)
 
-print(text)
+print(text[0])
 
 #textWithPOS_TAGGER = TEXTO
 

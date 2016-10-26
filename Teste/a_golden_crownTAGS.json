@@ -1,6 +1,7 @@
 {
-	"tags": [[0,17,"Lord Eddard Stark", "PERSON"],
-		         [107, 122, "Jaime Lannister", "PERSON"],
-		         [144, 165, "King Robert Baratheon", "PERSON"],
-		         [170, 182, "Queen Cersei", "PERSON"]]
+	"tags": [
+				[0, 0, 3, "PERSON"],
+				[0, 20, 2, "PERSON"],
+				[1, 7, 2, "PERSON"]
+			]
 }	
