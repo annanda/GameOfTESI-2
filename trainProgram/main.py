@@ -13,6 +13,11 @@ class Window(Frame):
         self.master = master
         self.init_window()
         
+        for i in range(60):
+            Grid.columnconfigure(self.master, i, weight=1)
+        for i in range(30):
+            Grid.rowconfigure(self.master, i, weight=1)
+        
         self.dataBOX = Listbox(master, selectmode=EXTENDED, height=25, width=20)
         self.wordBOX = Text(master, height=26, width=30)
         self.addButton = Button(master, text="Add NE", command=self.addNE, height=1, width=7)
@@ -22,7 +27,9 @@ class Window(Frame):
                         
         self.listTokens = []
         self.sizeOfSents = []                
-                        
+        self.currentLocation = IntVar()
+        self.currentLocation.set(0)
+                      
     def init_window(self):
         
         self.master.title("Game of Annotation")
@@ -65,13 +72,11 @@ class Window(Frame):
 
 
         summary = text["summary"]
-        currentLocation = IntVar()
-        currentLocation.set(0)
         self.locations = []
         for location in range(len(summary)):
             print(location)
-            self.locations.append(Radiobutton(self.master, text=summary[location]["location"], variable=currentLocation, value=location))
-            self.locations[location].grid(row=location + 1, column=1)
+            self.locations.append(Radiobutton(self.master, text=summary[location]["location"], variable=self.currentLocation, value=location))
+            self.locations[location].grid(row=location + 1, column=1, sticky=W+N+S)
             # print(radioBtn)
 
         print("pos for")
@@ -82,18 +87,18 @@ class Window(Frame):
         for item in self.listTokens:
             self.sizeOfSents.append(len(item))
         
-        self.addButton.grid(row=2 + len(summary), column=1)
-        self.removeButton.grid(row=3 + len(summary), column=1)
-        self.loadButton.grid(row=0, column=0)
-        self.saveButton.grid(row=0, column=2)
+        self.addButton.grid(row=2 + len(summary), column=1, sticky=N+S+E+W)
+        self.removeButton.grid(row=3 + len(summary), column=1, sticky=N+S+E+W)
+        self.loadButton.grid(row=0, column=0, sticky=N+S+E+W)
+        self.saveButton.grid(row=0, column=2, sticky=N+S+E+W)
         
         #Add box of words
         for sents in self.listTokens:
             for token in sents:
                 self.dataBOX.insert(END, token)
-        self.dataBOX.grid(row=1, column=0, rowspan=3 + len(summary))
+        self.dataBOX.grid(row=1, column=0, rowspan=3 + len(summary), sticky=N+S+E+W)
         
-        self.wordBOX.grid(row=1, column=2, rowspan=3 + len(summary))
+        self.wordBOX.grid(row=1, column=2, rowspan=3 + len(summary), sticky=N+S+E+W)
         
         
     def addNE(self):
