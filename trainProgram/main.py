@@ -19,14 +19,15 @@ class Window(Frame):
             Grid.rowconfigure(self.master, i, weight=1)
         
         self.dataBOX = Listbox(master, selectmode=EXTENDED, height=25, width=20)
-        self.wordBOX = Text(master, height=26, width=30)
+        self.wordBOX = Listbox(master, selectmode=EXTENDED, height=25, width=30)
         self.addButton = Button(master, text="Add NE", command=self.addNE, height=1, width=7)
-        self.removeButton = Button(master, text="Remove NE", command=self.addNE, height=1, width=7)                
+        self.removeButton = Button(master, text="Remove NE", command=self.removeNE, height=1, width=7)                
         self.loadButton = Button(master, text="Load File", command=self.addNE, height=1, width=7)
         self.saveButton = Button(master, text="Save File", command=self.addNE, height=1, width=7)
                         
         self.listTokens = []
-        self.sizeOfSents = []                
+        self.sizeOfSents = []
+        self.taggedTupples = {}                
         self.currentLocation = IntVar()
         self.currentLocation.set(0)
                       
@@ -71,15 +72,22 @@ class Window(Frame):
             return
 
 
-        summary = text["summary"]
+        self.summary = text["summary"]
+        summary = self.summary
         self.locations = []
         for location in range(len(summary)):
-            print(location)
-            self.locations.append(Radiobutton(self.master, text=summary[location]["location"], variable=self.currentLocation, value=location))
+            self.locations.append(Radiobutton(self.master, text=summary[location]["location"], variable=self.currentLocation, value=location, command=self.changeLocation))
             self.locations[location].grid(row=location + 1, column=1, sticky=W+N+S)
             # print(radioBtn)
 
-        print("pos for")
+        self.addButton.grid(row=2 + len(summary), column=1, sticky=N+S+E+W)
+        self.removeButton.grid(row=3 + len(summary), column=1, sticky=N+S+E+W)
+        self.loadButton.grid(row=0, column=0, sticky=N+S+E+W)
+        self.saveButton.grid(row=0, column=2, sticky=N+S+E+W)
+        
+        self.dataBOX.grid(row=1, column=0, rowspan=3 + len(summary), sticky=N+S+E+W)
+        self.wordBOX.grid(row=1, column=2, rowspan=3 + len(summary), sticky=N+S+E+W)
+        
         text = text["summary"][0]["content"]
         sents = sent_tokenize(text)
         for sent in sents:
@@ -87,23 +95,38 @@ class Window(Frame):
         for item in self.listTokens:
             self.sizeOfSents.append(len(item))
         
-        self.addButton.grid(row=2 + len(summary), column=1, sticky=N+S+E+W)
-        self.removeButton.grid(row=3 + len(summary), column=1, sticky=N+S+E+W)
-        self.loadButton.grid(row=0, column=0, sticky=N+S+E+W)
-        self.saveButton.grid(row=0, column=2, sticky=N+S+E+W)
         
-        #Add box of words
+        # Add box of words
         for sents in self.listTokens:
             for token in sents:
                 self.dataBOX.insert(END, token)
-        self.dataBOX.grid(row=1, column=0, rowspan=3 + len(summary), sticky=N+S+E+W)
+
+    def changeLocation(self):
+        self.dataBOX.delete(0,END)
+        self.wordBOX.delete(0, END)
+        text = self.summary[self.currentLocation.get()]["content"]
+        sents = sent_tokenize(text)
+        self.listTokens = []
+        self.sizeOfSents = []
+        for sent in sents:
+            self.listTokens.append(word_tokenize(sent))
+        for item in self.listTokens:
+            self.sizeOfSents.append(len(item))
         
-        self.wordBOX.grid(row=1, column=2, rowspan=3 + len(summary), sticky=N+S+E+W)
-        
+        # Add box of words
+        for sents in self.listTokens:
+            for token in sents:
+                self.dataBOX.insert(END, token)
+        locTag = self.summary[self.currentLocation.get()]["location"]
+        if(locTag in self.taggedTupples):
+            for item in self.taggedTupples[locTag]:
+                self.wordBOX.insert(END, str(item) + "\n")
+
         
     def addNE(self):
         wordIndexes = list(self.dataBOX.curselection())
-        
+        if(not wordIndexes):
+            return
         #Find sent_index:
         sumTotal = 0
         sent_index = 0
@@ -114,11 +137,24 @@ class Window(Frame):
             sumTotal += item
         
         word_index = -sum(self.sizeOfSents[0:sent_index])+wordIndexes[0]
-        lenght = len(wordIndexes)
+        length = len(wordIndexes)
         typeNE = "PERSON"
-        writeItem = "(" + str(sent_index) + ", " + str(word_index) + ", " + str(lenght) + ", " + typeNE + ")"
+        writeItem = "(" + str(sent_index) + ", " + str(word_index) + ", " + str(length) + ", " + typeNE + ")"
         self.wordBOX.insert(END, writeItem + "\n")
+        locTag = self.summary[self.currentLocation.get()]["location"]
+        if(locTag not in self.taggedTupples):
+            self.taggedTupples[locTag] = []
+        self.taggedTupples[locTag].append((sent_index, word_index, length, typeNE))
         
+    def removeNE(self):
+        wordIndexes = list(self.wordBOX.curselection())
+        if(not wordIndexes):
+            return
+        for i in wordIndexes:
+            locTag = self.summary[self.currentLocation.get()]["location"]
+            del self.taggedTupples[locTag][i]
+            self.wordBOX.delete(i)
+
 def create_window():
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
