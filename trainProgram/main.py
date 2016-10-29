@@ -1,5 +1,6 @@
 from tkinter import *
 import tkinter as tk
+from PIL import ImageTk, Image
 from nltk import word_tokenize
 from nltk import sent_tokenize
 import json
@@ -11,39 +12,44 @@ class Window(Frame):
         Frame.__init__(self, master)
         
         self.master = master
-        self.init_window()
+        self.configure()
         
+        self.init_firstScene()
+        self.init_secondScene()
+        
+        #Init Variables:
+        self.init_variables()
+            
+    def configure(self):
+        self.master.title("Game of Annotation")
         for i in range(60):
             Grid.columnconfigure(self.master, i, weight=1)
         for i in range(30):
             Grid.rowconfigure(self.master, i, weight=1)
+    
+    def init_firstScene(self):
+        self.background_image = ImageTk.PhotoImage(file="game-of-thrones1.jpg")
+        self.panel = Canvas(width = self.background_image.width(), height = self.background_image.height())
+        self.panel.grid()
+        self.panel.create_image(self.background_image.width()/2.0, self.background_image.height()/2.0, image = self.background_image)
+        self.startButton = Button(self.master, text="Choose File", command=self.openFile, height=3, width=15)
+        self.aboutButton = Button(self.master, text="About", command=self.infoAbout, height=3, width=15)
+        self.panel.create_window(350, 450, window=self.startButton)
+        self.panel.create_window(650, 450, window=self.aboutButton)
         
-        self.dataBOX = Listbox(master, selectmode=EXTENDED, height=25, width=20)
-        self.wordBOX = Text(master, height=26, width=30)
-        self.addButton = Button(master, text="Add NE", command=self.addNE, height=1, width=7)
-        self.removeButton = Button(master, text="Remove NE", command=self.addNE, height=1, width=7)                
-        self.loadButton = Button(master, text="Load File", command=self.addNE, height=1, width=7)
-        self.saveButton = Button(master, text="Save File", command=self.addNE, height=1, width=7)
-                        
+    def init_secondScene(self):
+        self.dataBOX = Listbox(self.master, selectmode=EXTENDED, height=30, width=20)
+        self.wordBOX = Text(self.master, height=26, width=30)
+        self.addButton = Button(self.master, text="Add NE", command=self.addNE, height=1, width=7)
+        self.removeButton = Button(self.master, text="Remove NE", command=self.addNE, height=1, width=7)                
+        self.loadButton = Button(self.master, text="Load File", command=self.addNE, height=1, width=7)
+        self.saveButton = Button(self.master, text="Save File", command=self.addNE, height=1, width=7)
+        
+    def init_variables(self):
         self.listTokens = []
         self.sizeOfSents = []                
         self.currentLocation = IntVar()
         self.currentLocation.set(0)
-                      
-    def init_window(self):
-        
-        self.master.title("Game of Annotation")
-        
-        menu = Menu(self.master)
-        self.master.config(menu=menu)
-        
-        fileMenu = Menu(menu)
-        fileMenu.add_command(label="Open File", command=self.openFile)
-        menu.add_cascade(label="File", menu=fileMenu)
-        
-        editMenu = Menu(menu)
-        editMenu.add_command(label="About", command=self.infoAbout)
-        menu.add_cascade(label="About", menu=editMenu)
         
     def infoAbout(self):    
         toplevel = Toplevel()
@@ -55,9 +61,12 @@ class Window(Frame):
         with open(file_path, "r") as f:
             text = f.read()
         text = json.loads(text)
+        self.mainScreen(text)
         
-        #option = OptionMenu(self.master, "one", "two", "three", "four")
-        #option.pack()
+    def mainScreen(self, text):
+        self.panel.grid_forget()
+        self.startButton.grid_forget()
+
         if("summary" not in text):
             err = Toplevel()
             err.title("Invalid JSON")
@@ -75,7 +84,7 @@ class Window(Frame):
         self.locations = []
         for location in range(len(summary)):
             print(location)
-            self.locations.append(Radiobutton(self.master, text=summary[location]["location"], variable=self.currentLocation, value=location))
+            self.locations.append(Radiobutton(self.master, height=1, width=20, text=summary[location]["location"], variable=self.currentLocation, value=location))
             self.locations[location].grid(row=location + 1, column=1, sticky=W+N+S)
             # print(radioBtn)
 
@@ -96,9 +105,9 @@ class Window(Frame):
         for sents in self.listTokens:
             for token in sents:
                 self.dataBOX.insert(END, token)
-        self.dataBOX.grid(row=1, column=0, rowspan=3 + len(summary), sticky=N+S+E+W)
+        self.dataBOX.grid(row=1, column=0, rowspan=10, sticky=N+S+E+W)
         
-        self.wordBOX.grid(row=1, column=2, rowspan=3 + len(summary), sticky=N+S+E+W)
+        self.wordBOX.grid(row=1, column=2, rowspan=10, sticky=N+S+E+W)
         
         
     def addNE(self):
@@ -122,9 +131,9 @@ class Window(Frame):
 def create_window():
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    x = (screen_width/2) - (800/2)        
+    x = (screen_width/2) - (1000/2)        
     y = (screen_height/2) - (600/2)
-    root.geometry("%dx%d+%d+%d" % (800, 600, x, y))
+    root.geometry("%dx%d+%d+%d" % (1000, 600, x, y))
     
 def center(toplevel):
     toplevel.update_idletasks()
