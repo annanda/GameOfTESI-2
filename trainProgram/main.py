@@ -51,7 +51,30 @@ class Window(Frame):
         
         #option = OptionMenu(self.master, "one", "two", "three", "four")
         #option.pack()
-        
+        if("summary" not in text):
+            err = Toplevel()
+            err.title("Invalid JSON")
+
+            msg = Message(err, text="Arquivo não possui a estrutura esperada.", width=300)
+            msg.pack()
+
+            button = Button(err, text="Dismiss", command=err.destroy)
+            button.pack()
+            center(err)
+            return
+
+
+        summary = text["summary"]
+        currentLocation = IntVar()
+        currentLocation.set(0)
+        self.locations = []
+        for location in range(len(summary)):
+            print(location)
+            self.locations.append(Radiobutton(self.master, text=summary[location]["location"], variable=currentLocation, value=location))
+            self.locations[location].grid(row=location + 1, column=1)
+            # print(radioBtn)
+
+        print("pos for")
         text = text["summary"][0]["content"]
         sents = sent_tokenize(text)
         for sent in sents:
@@ -59,8 +82,8 @@ class Window(Frame):
         for item in self.listTokens:
             self.sizeOfSents.append(len(item))
         
-        self.addButton.grid(row=2, column=1)
-        self.removeButton.grid(row=3, column=1)
+        self.addButton.grid(row=2 + len(summary), column=1)
+        self.removeButton.grid(row=3 + len(summary), column=1)
         self.loadButton.grid(row=0, column=0)
         self.saveButton.grid(row=0, column=2)
         
@@ -68,9 +91,9 @@ class Window(Frame):
         for sents in self.listTokens:
             for token in sents:
                 self.dataBOX.insert(END, token)
-        self.dataBOX.grid(row=1, column=0, rowspan=3)
+        self.dataBOX.grid(row=1, column=0, rowspan=3 + len(summary))
         
-        self.wordBOX.grid(row=1, column=2, rowspan=3)
+        self.wordBOX.grid(row=1, column=2, rowspan=3 + len(summary))
         
         
     def addNE(self):
@@ -94,10 +117,19 @@ class Window(Frame):
 def create_window():
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    x = (screen_width/2) - (500/2)        
-    y = (screen_height/2) - (480/2)
-    root.geometry("%dx%d+%d+%d" % (500, 480, x, y))
+    x = (screen_width/2) - (800/2)        
+    y = (screen_height/2) - (600/2)
+    root.geometry("%dx%d+%d+%d" % (800, 600, x, y))
     
+def center(toplevel):
+    toplevel.update_idletasks()
+    w = toplevel.winfo_screenwidth()
+    h = toplevel.winfo_screenheight()
+    size = tuple(int(_) for _ in toplevel.geometry().split('+')[0].split('x'))
+    x = w/2 - size[0]/2
+    y = h/2 - size[1]/2
+    toplevel.geometry("%dx%d+%d+%d" % (size + (x, y)))
+
 root = Tk()
 create_window()
 app = Window(root)
