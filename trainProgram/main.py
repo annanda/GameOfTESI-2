@@ -46,6 +46,7 @@ class Window(Frame):
         self.panel.create_window(650, 450, window=self.aboutButton)
         
     def init_secondScene(self):
+        # self.scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.dataBOX = Listbox(self.master, selectmode=EXTENDED, height=30, width=20)
         self.wordBOX = Listbox(self.master, selectmode=EXTENDED, height=25, width=30)
         self.addButton = Button(self.master, text="Add NE", command=self.addNE, height=1, width=7)
@@ -62,6 +63,7 @@ class Window(Frame):
         self.currentNEType = StringVar()
         self.currentLocation.set(0)
         self.currentNEType.set("PERSON")
+        self.colors = {"PERSON": "#90D491", "LOCATION": "#90AAD4", "ORGANIZATION": "#D46B5F", "OTHER": "#AC81D4"}
         
     def infoAbout(self):    
         toplevel = Toplevel()
@@ -108,8 +110,6 @@ class Window(Frame):
 
         
     def mainScreen(self, text):
-        self.panel.grid_forget()
-        self.startButton.grid_forget()
 
         if("summary" not in text):
             err = Toplevel()
@@ -123,6 +123,8 @@ class Window(Frame):
             center(err)
             return
 
+        self.panel.grid_forget()
+        self.startButton.grid_forget()
 
         self.summary = text["summary"]
         summary = self.summary
@@ -136,6 +138,8 @@ class Window(Frame):
         self.removeButton.grid(row=4 + len(summary), column=1, sticky=N+S+E+W)
         self.loadButton.grid(row=0, column=0, sticky=N+S+E+W)
         self.saveButton.grid(row=0, column=2, sticky=N+S+E+W)
+        # self.scrollbar.config(command=self.dataBOX.yview)
+        # self.scrollbar.pack(side=RIGHT, fill=Y)
         self.dataBOX.grid(row=1, column=0, rowspan=10, sticky=N+S+E+W)
         self.wordBOX.grid(row=1, column=2, rowspan=10, sticky=N+S+E+W)
         
@@ -178,7 +182,7 @@ class Window(Frame):
         wordIndexes = list(self.dataBOX.curselection())
         if(not wordIndexes):
             return
-            
+
         #Find sent_index:
         sumTotal = 0
         sent_index = 0
@@ -197,6 +201,10 @@ class Window(Frame):
         if(locTag not in self.taggedTupples):
             self.taggedTupples[locTag] = []
         self.taggedTupples[locTag].append((sent_index, word_index, length, typeNE))
+
+        #Color selected cells
+        for sel in wordIndexes:
+            self.dataBOX.itemconfig(sel, bg=self.colors[typeNE])
         
     def removeNE(self):
         wordIndexes = list(self.wordBOX.curselection())
