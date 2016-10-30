@@ -50,7 +50,7 @@ class Window(Frame):
         self.addButton = Button(self.master, text="Add NE", command=self.addNE, height=1, width=7)
         self.removeButton = Button(self.master, text="Remove NE", command=self.removeNE, height=1, width=7)                
         self.loadButton = Button(self.master, text="Load File", command=self.addNE, height=1, width=7)
-        self.saveButton = Button(self.master, text="Save File", command=self.addNE, height=1, width=7)
+        self.saveButton = Button(self.master, text="Save File", command=self.saveFile, height=1, width=7)
         
     def init_variables(self):
         self.listTokens = []
@@ -70,6 +70,38 @@ class Window(Frame):
             text = f.read()
         text = json.loads(text)
         self.mainScreen(text)
+
+    def saveFile(self):
+    	file_path = tk.filedialog.asksaveasfile(mode='w', defaultextension=".json")
+    	if file_path is None:
+    		return
+    	file_path.write(self.toJSON(self.taggedTupples))
+    	file_path.close()
+    	print(file_path)
+
+    def toJSON(self, dict):
+    	i = 0
+    	jsonString = "{\"summary\": ["
+    	for location in self.taggedTupples:
+    		jsonString += "{\"location\": \"" + location + "\","
+    		jsonString += "\"entities\": " + str(self.tuppleArrayToArrayArray(self.taggedTupples[location])).replace("'", "\"")
+    		if(i != len(self.taggedTupples) -1):
+    			jsonString += "},"
+    		else:
+    			jsonString += "}]"
+    		i+=1
+    	jsonString += "}"
+    	return jsonString
+
+    def tuppleArrayToArrayArray(self, tupArr):
+    	array = []
+    	for tup in range(len(tupArr)):
+    		array.append([])
+    		for item in tupArr[tup]:
+    			array[tup].append(item)
+    	return array
+
+
         
     def mainScreen(self, text):
         self.panel.grid_forget()
