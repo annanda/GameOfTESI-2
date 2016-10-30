@@ -14,11 +14,12 @@ class Window(Frame):
         self.master = master
         self.configure()
         
+        #Init Variables:
+        self.init_variables()
+
         self.init_firstScene()
         self.init_secondScene()
         
-        #Init Variables:
-        self.init_variables()
             
     def configure(self):
         self.master.title("Game of Annotation")
@@ -51,13 +52,16 @@ class Window(Frame):
         self.removeButton = Button(self.master, text="Remove NE", command=self.removeNE, height=1, width=7)                
         self.loadButton = Button(self.master, text="Load File", command=self.addNE, height=1, width=7)
         self.saveButton = Button(self.master, text="Save File", command=self.saveFile, height=1, width=7)
+        self.neTypeDropdown = OptionMenu(self.master, self.currentNEType, "PERSON", "LOCATION", "ORGANIZATION", "OTHER")
         
     def init_variables(self):
         self.listTokens = []
         self.sizeOfSents = []
         self.taggedTupples = {}                
         self.currentLocation = IntVar()
+        self.currentNEType = StringVar()
         self.currentLocation.set(0)
+        self.currentNEType.set("PERSON")
         
     def infoAbout(self):    
         toplevel = Toplevel()
@@ -127,8 +131,9 @@ class Window(Frame):
             self.locations.append(Radiobutton(self.master, height=1, width=20, text=summary[location]["location"], variable=self.currentLocation, value=location, command=self.changeLocation))
             self.locations[location].grid(row=location + 1, column=1, sticky=W+N+S)
 
-        self.addButton.grid(row=2 + len(summary), column=1, sticky=N+S+E+W)
-        self.removeButton.grid(row=3 + len(summary), column=1, sticky=N+S+E+W)
+        self.neTypeDropdown.grid(row=2 + len(summary), column=1, sticky=E+W)
+        self.addButton.grid(row=3 + len(summary), column=1, sticky=N+S+E+W)
+        self.removeButton.grid(row=4 + len(summary), column=1, sticky=N+S+E+W)
         self.loadButton.grid(row=0, column=0, sticky=N+S+E+W)
         self.saveButton.grid(row=0, column=2, sticky=N+S+E+W)
         self.dataBOX.grid(row=1, column=0, rowspan=10, sticky=N+S+E+W)
@@ -185,7 +190,7 @@ class Window(Frame):
         
         word_index = -sum(self.sizeOfSents[0:sent_index])+wordIndexes[0]
         length = len(wordIndexes)
-        typeNE = "PERSON"
+        typeNE = self.currentNEType.get()
         writeItem = "(" + str(sent_index) + ", " + str(word_index) + ", " + str(length) + ", " + typeNE + ")"
         self.wordBOX.insert(END, writeItem + "\n")
         locTag = self.summary[self.currentLocation.get()]["location"]
