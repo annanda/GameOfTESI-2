@@ -51,11 +51,12 @@ class Window(Frame):
         self.wordBOX = Listbox(self.master, selectmode=EXTENDED, height=25, width=30)
         self.addButton = Button(self.master, text="Add NE", command=self.addNE, height=1, width=7)
         self.removeButton = Button(self.master, text="Remove NE", command=self.removeNE, height=1, width=7)                
-        self.loadButton = Button(self.master, text="Load File", command=self.addNE, height=1, width=7)
+        self.loadButton = Button(self.master, text="Load File", command=self.loadFile, height=1, width=7)
         self.saveButton = Button(self.master, text="Save File", command=self.saveFile, height=1, width=7)
         self.neTypeDropdown = OptionMenu(self.master, self.currentNEType, "PERSON", "LOCATION", "ORGANIZATION", "OTHER")
         
     def init_variables(self):
+        self.allSaved = True
         self.listTokens = []
         self.sizeOfSents = []
         self.taggedTupples = {}                
@@ -77,13 +78,65 @@ class Window(Frame):
         text = json.loads(text)
         self.mainScreen(text)
 
+    def discardChanges(self):
+        self.err.destroy()
+        self.loadFile(True)
+
+    def loadFile(self, loadAnyway=False):
+        #Check for unsaved material
+        if(not self.allSaved and not loadAnyway):
+            self.err = Toplevel()
+            self.err.title("File not saved!")
+
+            msg = Message(self.err, text="Você ainda não salvou suas mudanças.\nAo carregar outro arquivo, mudanças não salvas serão perdidas.\nDeseja continuar?", width=300, justify="center")
+            msg.grid(row=0, column=0, columnspan=2)
+
+            buttonYes = Button(self.err, text="Yes", command=self.discardChanges)
+            buttonYes.grid(row=1, column=0)
+
+            buttonNo = Button(self.err, text="No", command=self.err.destroy)
+            buttonNo.grid(row=1, column=1)
+            center(self.err)
+            return
+
+        file_path = tk.filedialog.askopenfilename()
+        with open(file_path, "r") as f:
+            text = f.read()
+        text = json.loads(text)
+
+        self.dataBOX.delete(0,END)
+        self.wordBOX.delete(0, END)
+        for radio in self.locations:
+            radio.grid_forget()
+
+        self.summary = text["summary"]
+        summary = self.summary
+        self.locations = []
+        for location in range(len(summary)):
+            self.locations.append(Radiobutton(self.master, height=1, width=20, text=summary[location]["location"], variable=self.currentLocation, value=location, command=self.changeLocation))
+            self.locations[location].grid(row=location + 1, column=1, sticky=W+N+S)
+
+        text = text["summary"][0]["content"]
+        sents = sent_tokenize(text)
+        self.listTokens = []
+        self.sizeOfSents = []
+        for sent in sents:
+            self.listTokens.append(word_tokenize(sent))
+        for item in self.listTokens:
+            self.sizeOfSents.append(len(item))
+        
+        # Add box of words
+        for sents in self.listTokens:
+            for token in sents:
+                self.dataBOX.insert(END, token)
+
     def saveFile(self):
-    	file_path = tk.filedialog.asksaveasfile(mode='w', defaultextension=".json")
-    	if file_path is None:
-    		return
-    	file_path.write(self.toJSON(self.taggedTupples))
-    	file_path.close()
-    	print(file_path)
+        file_path = tk.filedialog.asksaveasfile(mode='w', defaultextension=".json")
+        if(file_path is None):
+            return
+        file_path.write(self.toJSON(self.taggedTupples))
+        file_path.close()
+        self.allSaved = True
 
     def toJSON(self, dict):
     	i = 0
@@ -183,6 +236,7 @@ class Window(Frame):
         if(not wordIndexes):
             return
 
+        self.allSaved = False
         #Find sent_index:
         sumTotal = 0
         sent_index = 0
