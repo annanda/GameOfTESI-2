@@ -55,6 +55,11 @@ class Window(Frame):
         self.loadButton = Button(self.master, text="Load File", command=self.loadFile, height=1, width=7)
         self.saveButton = Button(self.master, text="Save File", command=self.saveFile, height=1, width=7)
         self.neTypeDropdown = OptionMenu(self.master, self.currentNEType, "PERSON", "LOCATION", "ORGANIZATION", "OTHER")
+        self.taggedText.tag_config("PERSON", background=self.colors["PERSON"])
+        self.taggedText.tag_config("LOCATION", background=self.colors["LOCATION"])
+        self.taggedText.tag_config("ORGANIZATION", background=self.colors["ORGANIZATION"])
+        self.taggedText.tag_config("OTHER", background=self.colors["OTHER"])
+        self.taggedText.tag_config("BLANK", background="white")
         
     def init_variables(self):
         self.allSaved = True
@@ -66,6 +71,7 @@ class Window(Frame):
         self.currentLocation.set(0)
         self.currentNEType.set("PERSON")
         self.colors = {"PERSON": "#90D491", "LOCATION": "#90AAD4", "ORGANIZATION": "#D46B5F", "OTHER": "#AC81D4"}
+        self.highlightTerms = {}
         
     def infoAbout(self):    
         toplevel = Toplevel()
@@ -216,6 +222,7 @@ class Window(Frame):
     def changeLocation(self):
         self.dataBOX.delete(0,END)
         self.wordBOX.delete(0, END)
+        self.taggedText.delete(1.0, END)
         text = self.summary[self.currentLocation.get()]["content"]
         sents = sent_tokenize(text)
         self.listTokens = []
@@ -234,6 +241,8 @@ class Window(Frame):
             for item in self.taggedTupples[locTag]:
                 self.wordBOX.insert(END, str(item) + "\n")
 
+        self.taggedText.insert(END, self.summary[self.currentLocation.get()]["content"])
+        self.showHighlight()
         
     def addNE(self):
         wordIndexes = list(self.dataBOX.curselection())
@@ -241,6 +250,7 @@ class Window(Frame):
             return
 
         self.allSaved = False
+
         #Find sent_index:
         sumTotal = 0
         sent_index = 0
@@ -263,6 +273,35 @@ class Window(Frame):
         #Color selected cells
         for sel in wordIndexes:
             self.dataBOX.itemconfig(sel, bg=self.colors[typeNE])
+
+        #Highlight tagged entities in the full text
+        self.addHighlight(wordIndexes, typeNE)
+        self.showHighlight()
+
+    def addHighlight(self, wordIndexes, type):
+        highlightTerm = ""
+        counter = 0
+        for index in wordIndexes:
+            apostrophe = False
+            nextFragment = self.dataBOX.get(index)
+            if(nextFragment[0] == "'"):
+                apostrophe = True
+            if(counter != 0 and not apostrophe):
+                 highlightTerm += " "
+            highlightTerm += nextFragment
+            counter+=1 
+
+        locTag = self.summary[self.currentLocation.get()]["location"]
+        if(locTag not in self.highlightTerms):
+            self.highlightTerms[locTag] = []
+        self.highlightTerms[locTag].append((highlightTerm, type))
+
+        # self.highlightTerms.append((highlightTerm, type))
+
+    def showHighlight(self):
+        locTag = self.summary[self.currentLocation.get()]["location"]
+        for h in self.highlightTerms[locTag]:
+            self.highlightText(self.taggedText, h[0], h[1])
         
     def removeNE(self):
         wordIndexes = list(self.wordBOX.curselection())
@@ -271,7 +310,20 @@ class Window(Frame):
         for i in wordIndexes:
             locTag = self.summary[self.currentLocation.get()]["location"]
             del self.taggedTupples[locTag][i]
+            pop = self.highlightTerms[locTag][i]
+            del self.highlightTerms[locTag][i]
+            self.highlightText(self.taggedText, pop[0], "BLANK")
             self.wordBOX.delete(i)
+        self.showHighlight()
+
+    def highlightText(self, text_widget, keyword, tag):
+        pos = '1.0'
+        while True:
+            idx = text_widget.search(keyword, pos, END)
+            if not idx:
+                break
+            pos = '{}+{}c'.format(idx, len(keyword))
+            text_widget.tag_add(tag, idx, pos)
 
 def create_window():
     screen_width = root.winfo_screenwidth()
