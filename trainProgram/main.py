@@ -49,6 +49,7 @@ class Window(Frame):
         # self.scrollbar = Scrollbar(self.master, orient=VERTICAL)
         self.dataBOX = Listbox(self.master, selectmode=EXTENDED, height=30, width=20)
         self.wordBOX = Listbox(self.master, selectmode=EXTENDED, height=25, width=30)
+        self.taggedText = Text(self.master, height=25, width=50)
         self.addButton = Button(self.master, text="Add NE", command=self.addNE, height=1, width=7)
         self.removeButton = Button(self.master, text="Remove NE", command=self.removeNE, height=1, width=7)                
         self.loadButton = Button(self.master, text="Load File", command=self.loadFile, height=1, width=7)
@@ -195,6 +196,7 @@ class Window(Frame):
         # self.scrollbar.pack(side=RIGHT, fill=Y)
         self.dataBOX.grid(row=1, column=0, rowspan=10, sticky=N+S+E+W)
         self.wordBOX.grid(row=1, column=2, rowspan=10, sticky=N+S+E+W)
+        self.taggedText.grid(row=1, column=3, rowspan=10, sticky=N+S+E+W)
         
         text = text["summary"][0]["content"]
         sents = sent_tokenize(text)
@@ -208,6 +210,8 @@ class Window(Frame):
         for sents in self.listTokens:
             for token in sents:
                 self.dataBOX.insert(END, token)
+
+        self.taggedText.insert(END, self.summary[0]["content"])
 
     def changeLocation(self):
         self.dataBOX.delete(0,END)
