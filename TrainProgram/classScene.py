@@ -144,6 +144,7 @@ class Window(Frame):
         sent_index = 0
         notBreak = 1
         for i, item in enumerate(self.tokensTXT[self.actual_block]):
+            print(wordIndexes, sumTotal)
             if wordIndexes[0] < sumTotal:
                 sent_index = i-1
                 prev = self.tokensTXT[self.actual_block][i-1]
@@ -207,8 +208,8 @@ class Window(Frame):
         file_path = tk.filedialog.asksaveasfile(mode="w", defaultextension=".json")
         if(file_path is None):
             return
-        with open("outputFILE.json", "w") as f:
-            json.dump(self.outputFILE, f, ensure_ascii=False)
+        # with open(file_path, "w") as fo:
+        json.dump(self.outputFILE, file_path, ensure_ascii=False)
     
     def hello(self):
         print("ae")
