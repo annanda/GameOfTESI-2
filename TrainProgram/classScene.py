@@ -143,25 +143,24 @@ class Window(Frame):
         sumTotal = 0
         sent_index = 0
         notBreak = 1
-        for i, item in enumerate(self.tokensTXT[self.actual_block]):
-            print(wordIndexes, sumTotal)
+        for i in range(len((self.tokensTXT[self.actual_block]))+1):
             if wordIndexes[0] < sumTotal:
                 sent_index = i-1
                 prev = self.tokensTXT[self.actual_block][i-1]
                 wordInSentIndex = wordIndexes[0] - (sumTotal - len(prev))
                 notBreak = 0
                 break
-            sumTotal += len(item)
+            sumTotal += len(self.tokensTXT[self.actual_block][i])
         if notBreak == 1:
             sent_index = len(self.tokensTXT[self.actual_block]) - 1
         
         sumTotal = 0
-        for i, item in enumerate(self.tokensTXT[self.actual_block]):
+        for i in range(len(self.tokensTXT[self.actual_block])+1):
             if wordIndexes[-1] < sumTotal:
                 prev = self.tokensTXT[self.actual_block][i-1]
                 LastwordInSentIndex = wordIndexes[-1] - (sumTotal - len(prev))
                 break
-            sumTotal += len(item)
+            sumTotal += len(self.tokensTXT[self.actual_block][i])
         
         
         #Find begin_index:
