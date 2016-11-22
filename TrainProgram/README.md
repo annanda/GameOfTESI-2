@@ -1,5 +1,5 @@
 # Game of Annotation
-Authors: Guilherme Freire e Hugo Gomes
+Autores: Guilherme Freire e Hugo Gomes
 
 O objetivo desse programa é ajudar na anotação manual de Entidades Nomeadas. 
 Como corpus usa-se arquivos retirados da [wiki do Game of Thrones](http://gameofthrones.wikia.com/wiki/Game_of_Thrones_Wiki).
