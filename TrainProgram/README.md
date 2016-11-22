@@ -23,12 +23,13 @@ pip install -r ../requirements.txt
 * Depois de baixado o código abra o diretório ```TrainProgram``` e rode o arquivo ```main.py```
 
 ## Como colaborar
-* Mande um email para hugodovs@hotmail.com dizendo que você quer colaborar, ele vai te falar em qual arquivo você vai trabalhar
-* Rode o programa clique em "Choose File"
-* Clique no arquivo do episódio que você vai marcar, que fica no diretório ```DataBase/EpisodesTXT```
-* Vai aparecer uma lista de pedaços do episódio que precisam ser marcadas, escolha uma parte e clique "OK"
-* Na coluna à esquerda selecione a Entidade Nomeada
-* Na coluna do meio escolha qual o tipo de entidade Nomeada (Person, Location, Organization, Other) 
-* Clique em "Add NE"
+* Mande um email para hugodovs@hotmail.com dizendo que você quer colaborar, ele vai te falar em qual arquivo você vai trabalhar.
+* Rode o programa clique em "Choose File".
+* Clique no arquivo do episódio que você vai marcar, que fica no diretório ```DataBase/EpisodesTXT```.
+* Vai aparecer uma lista de pedaços do episódio que precisam ser marcadas, escolha todas as partes e clique "OK".
+* Na coluna à esquerda selecione a Entidade Nomeada.
+* Na coluna do meio escolha qual o tipo de entidade Nomeada (Person, Location, Organization, Other).
+* Clique em "Add NE".
 * Se a Entidade Nomeada tiver mais que um nome, selecione os nomes com CTRL pressionado. 
+* Na coluna do meio também tem a opção de todas as partes que você selecionou para anotar. Quando acabar de anotar uma parte, selecione outra parte para fazer a anotação.
 * Salve o arquivo em formato outputFILE.txt
